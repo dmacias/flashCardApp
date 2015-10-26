@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+	<title>Italiano a Espa&ntilde;ol Le schede flash!</title>
+	<style>
+		*{
+			margin: 0;
+			padding: 0;
+		}
+		a{
+			text-decoration: none;
+		}
+		h2{
+			text-align: center;
+			margin: .6em;
+		}
+		.itlCont{
+			margin: .5em;
+			display: block;
+			text-align: center;
+		}
+		.italiano{
+			font-size: 6em;
+		}
+		.oculta{
+			width: 100%;
+			min-height: 8em;
+			padding: 1em 0 0;
+			text-align: center;
+			background-color: rgba(81, 148, 244, 0.35);
+			cursor: pointer;
+		}
+		.espanol{
+			font-size: 5em;
+			text-align: center;
+		}
+		.next{
+			font-size: 2.5em;
+			text-align: center;
+			margin: .3em;
+			display: block;
+		}
+		.categories{
+		}
+		.header{
+			text-align: center;
+		}
+	</style>
+	<script type="text/javascript">
+		$(function(){
+			var $esp = $(".espanol");
+			var $itl = $(".italiano");
+			var $cats = $(".categories");
+
+			var currCategory;
+
+			function getRandomTranslation(category){
+				$.get("/api/categories/"+category+"/translations/random", function(data){
+					if (data != null) {
+						$itl.html(data.italiano);
+						$itl.prop('href', "https://translate.google.com/#it/es/" + data.italiano);
+						if (data.espanol != null) {
+							$esp.html(data.espanol);
+							$esp.prop('href', 'https://translate.google.com/#es/en/' + data.espanol);
+							$(".oculta").css('visibility', 'visible');
+						} else {
+							$(".oculta").css('visibility', 'hidden');
+						}
+					}
+				});
+			};
+
+			//events
+			$(".next").click(function(){
+				getRandomTranslation(currCategory);
+				$esp.hide();
+			});
+
+			$(".oculta").click(function(){
+				$esp.show();
+			});
+
+			$cats.change(function(ev){
+				currCategory = $cats.prop("value");
+				getRandomTranslation(currCategory);
+				$esp.hide();
+			});
+
+			//execute
+			$esp.hide();
+
+			$.get("/api/categories", function(data){
+				if (data.length > 0){
+					for (var i = 0; i < data.length; i++){
+						$cats.append($("<option></option>").val(data[i]).html(data[i]));
+					};
+					$cats.change();
+				}else{
+					$cats.append($("<option>No Categories Available</option>"));
+				}
+			});
+		});
+	</script>
+</head>
+<body>
+	<div class="header">
+		<h2>Italiano a Espa&ntilde;ol: le schede flash!</h2>
+		<select class="categories"></select>
+	</div>
+	<div class="itlCont">
+		<a href="javascript:void(0)" target="_blank" class="italiano"></a>
+	</div>
+	<div class="oculta">
+		<a class="espanol" target="_blank" href="javascript:void(0)"></a>
+	</div>
+	<a href="javascript:void(0)" class="next">Prossimo|Next >></a>
+</body>
